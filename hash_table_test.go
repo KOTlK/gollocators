@@ -49,6 +49,10 @@ func (a *testAllocator) Free(data unsafe.Pointer) error {
 	return nil
 }
 
+func (a *testAllocator) Destroy() {
+	
+}
+
 func (a *testAllocator) FreeAll()      {}
 func (a *testAllocator) IsTemp() bool  { return a.temp }
 

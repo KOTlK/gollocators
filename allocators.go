@@ -7,30 +7,38 @@ type Allocator interface {
     Free(data Pointer) error
     FreeAll()
     IsTemp() bool
+    Destroy()
 }
 
-func Calloc[T any](allocator Allocator, count uint) (*T, error) {
+func Calloc[T any](allocator Allocator, count uint) (uintptr, error) {
     var t T
-    data, error := allocator.Malloc(uint(Sizeof(t)) * count)
+    data, err := allocator.Malloc(uint(Sizeof(t)) * count)
 
-    if error != nil {
-        return nil, error
+    if err != nil {
+        return 0, err
     }
 
-    return (*T)(data), nil
+    return uintptr(data), nil
 }
 
 func CallocSliced[T any](allocator Allocator, count uint) ([]T, error) {
     var t T
-    data, error := allocator.Malloc(uint(Sizeof(t)) * count)
+    data, err := allocator.Malloc(uint(Sizeof(t)) * count)
 
-    if error != nil {
-        return nil, error
+    if err != nil {
+        return nil, err
     }
 
     return Slice((*T)(data), count), nil
 }
 
 func AppendStruct[T any](allocator Allocator) (*T, error) {
-    return Calloc[T](allocator, 1)
+    var t T
+    data, err := allocator.Malloc(uint(Sizeof(t)))
+
+    if err != nil {
+        return &t, err
+    }
+
+    return (*T)(data), nil
 }
