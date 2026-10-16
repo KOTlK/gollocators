@@ -108,6 +108,20 @@ func MakeHashTableWithCustomHashFunc[TKey comparable, TValue any](allocator Allo
 	return table, nil
 }
 
+func (table *HashTable[TKey, TValue]) Destroy() {
+	if table.Allocator.IsTemp() == false {
+		table.Allocator.Free(unsafe.Pointer(unsafe.SliceData(table.Items)))
+		return
+	}
+	
+	table.Items     = nil
+	table.Count     = 0
+	table.Capacity  = 0
+	table.Allocator = nil
+	table.Occupied  = 0
+	table.Hashfunc  = nil
+}
+
 // Insert item into a table.
 // Returns true on success, false if item have been inserted before or for some reason insertion is impossible.
 func (table *HashTable[TKey, TValue]) Insert(key TKey, value TValue) bool {
